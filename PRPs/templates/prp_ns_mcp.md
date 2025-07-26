@@ -98,9 +98,12 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - file: src/resources/stationsV3.ts
   why: Shows how to expose NS API results as MCP resources
 
+
 # Add n documentation related to the users use case as needed below
 
-
+- file: PRPs/ai_docs/nsapp-stations-api.json
+  why: Specifications of the NS API for stations information
+  
 ```
 
 ### Current Codebase Tree (Run `tree -I node_modules` in project root)
@@ -266,6 +269,92 @@ Task 6 - Deployment
   - Add `Dockerfile` or deploy to Cloudflare/Node host
   - Store NS API key and user API keys as secrets
 ```
+### Per Task Implementation Details
+
+```typescript
+// Task 4 - MCP Server Implementation Pattern
+export class YourMCP extends McpAgent<Env, Record<string, never>, Props> {
+  server = new McpServer({
+    name: "Your MCP Server Name",
+    version: "1.0.0",
+  });
+
+  // CRITICAL: Always implement cleanup
+  async cleanup(): Promise<void> {
+    try {
+      await closeDb();
+      console.log("Database connections closed successfully");
+    } catch (error) {
+      console.error("Error during database cleanup:", error);
+    }
+  }
+
+  async alarm(): Promise<void> {
+    await this.cleanup();
+  }
+
+  async init() {
+    // PATTERN: Use centralized tool registration
+    registerAllTools(this.server, this.env, this.props);
+  }
+}
+
+// Task 3 - Tool Module Pattern (e.g., src/tools/your-feature-tools.ts)
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Props } from "../types";
+import { z } from "zod";
+
+const PRIVILEGED_USERS = new Set(["admin1", "admin2"]);
+
+export function registerYourFeatureTools(server: McpServer, env: Env, props: Props) {
+  // Tool 1: Available to all authenticated users
+  server.tool(
+    "yourBasicTool",
+    "Description of your basic tool",
+    YourToolSchema, // Zod validation schema
+    async ({ param1, param2, options }) => {
+      try {
+        // PATTERN: Tool implementation with error handling
+        const result = await performOperation(param1, param2, options);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `**Success**\n\nOperation completed\n\n**Result:**\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            },
+          ],
+        };
+      } catch (error) {
+        return createErrorResponse(`Operation failed: ${error.message}`);
+      }
+    },
+  );
+
+  // Tool 2: Only for privileged users
+  if (PRIVILEGED_USERS.has(props.login)) {
+    server.tool(
+      "privilegedTool",
+      "Administrative tool for privileged users",
+      { action: z.string() },
+      async ({ action }) => {
+        // Implementation
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Admin action '${action}' executed by ${props.login}`,
+            },
+          ],
+        };
+      },
+    );
+  }
+}
+```
+
+
+
 ### Integration Points
 
 ```yaml

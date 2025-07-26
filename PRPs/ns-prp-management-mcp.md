@@ -5,13 +5,13 @@ description: A comprehensive MCP server providing Dutch Railways API access with
 
 ## Purpose
 
-Production-ready MCP server that combines Dutch Railways (NS) API access with intelligent PRP (Product Requirement Prompt) management. Uses GitHub OAuth authentication, PostgreSQL database, Anthropic AI for PRP parsing, and provides comprehensive task/documentation CRUD operations.
+Production-ready MCP server that combines Dutch Railways (NS) API access with intelligent PRP (Product Requirement Prompt) management. Uses API key authentication, PostgreSQL database, Anthropic AI for PRP parsing, and provides comprehensive task/documentation CRUD operations.
 
 ## Core Principles
 
 1. **Context is King**: Include all NS API patterns, PRP parsing logic, and database management capabilities
 2. **Validation Loops**: Comprehensive testing from TypeScript compilation to production deployment
-3. **Security First**: GitHub OAuth with role-based access, SQL injection protection, API key management
+3. **Security First**: API key authentication with role-based access, SQL injection protection, API key management
 4. **Production Ready**: Cloudflare Workers deployment with monitoring and error handling
 5. **AI Integration**: Seamless Anthropic API integration for intelligent PRP parsing
 
@@ -24,14 +24,14 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - **NS Railways API Integration** - Secure access to Dutch public transport data
 - **AI-Powered PRP Parsing** - Anthropic-based extraction of tasks from PRPs
 - **Task Management System** - Complete CRUD operations for tasks, documentation, and tags
-- **GitHub OAuth Authentication** - Role-based access control with user permissions
+- **API Key Authentication** - Role-based access control with user permissions
 - **PostgreSQL Database** - Structured storage for tasks, PRPs, and metadata
 - **Cloudflare Workers Deployment** - Global edge deployment with monitoring
 
 ## Why
 
 - **Developer Productivity**: Enable AI assistants to manage Dutch transport data and project requirements
-- **Enterprise Security**: GitHub OAuth with granular permission system and API key management
+- **Enterprise Security**: API key authentication with granular permission system and secure API key management
 - **AI-Enhanced Workflow**: Automated extraction of actionable tasks from requirement documents
 - **Scalability**: Cloudflare Workers global edge deployment with database connection pooling
 - **Integration**: Bridge between NS public APIs and internal project management systems
@@ -75,11 +75,11 @@ Build a production-ready MCP (Model Context Protocol) server with:
 
 **Authentication & Authorization:**
 
-- GitHub OAuth 2.0 integration with HMAC-signed cookie approval system
+- API key authentication with validation middleware
 - Role-based access control (read-only vs privileged users vs admin)
 - User context propagation to all MCP tools
-- Secure session management with encrypted cookies
-- API key management for NS API access
+- Secure API key management and validation
+- Request-level authentication for all operations
 
 **Database Integration:**
 
@@ -108,7 +108,7 @@ Build a production-ready MCP (Model Context Protocol) server with:
 ### Success Criteria
 
 - [ ] MCP server passes validation with MCP Inspector
-- [ ] GitHub OAuth flow works end-to-end (authorization → callback → MCP access)
+- [ ] API key authentication flow works end-to-end (key validation → MCP access)
 - [ ] TypeScript compilation succeeds with no errors
 - [ ] All NS API integrations return correct data with proper error handling
 - [ ] Anthropic AI parsing extracts tasks accurately from PRP documents
@@ -143,12 +143,9 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - file: src/index_sentry.ts
   why: Sentry-enabled version for production monitoring - USE for production deployment
 
-# AUTHENTICATION PATTERNS - GitHub OAuth implementation
-- file: src/auth/github-handler.ts
-  why: OAuth flow implementation - USE this exact pattern for authentication
-
-- file: src/auth/oauth-utils.ts
-  why: Cookie security and session management - FOLLOW these patterns
+# AUTHENTICATION PATTERNS - API Key implementation
+- file: src/server/auth.ts
+  why: API key authentication implementation - USE this exact pattern for authentication
 
 # DATABASE INTEGRATION - Security and connection patterns
 - file: src/database/connection.ts
@@ -196,16 +193,13 @@ Build a production-ready MCP (Model Context Protocol) server with:
 ├── src/
 │   ├── index.ts                 # Main authenticated MCP server ← STUDY THIS
 │   ├── index_sentry.ts         # Sentry monitoring version ← USE FOR PRODUCTION
-│   ├── auth/                   # Authentication system
-│   │   ├── github-handler.ts   # OAuth implementation ← USE THIS PATTERN
-│   │   └── oauth-utils.ts      # Cookie security system ← SECURITY PATTERNS
+│   ├── server/                 # Server utilities
+│   │   ├── auth.ts             # API key authentication ← USE THIS PATTERN
+│   │   └── rateLimiter.ts      # Rate limiting middleware
 │   ├── database/               # Database integration
 │   │   ├── connection.ts       # Connection pooling ← CONNECTION PATTERNS
 │   │   ├── security.ts         # SQL validation ← SECURITY CRITICAL
 │   │   └── utils.ts            # Database utilities ← ERROR HANDLING
-│   ├── server/                 # Server utilities (rate limiting, etc.)
-│   │   ├── auth.ts             # Additional auth utilities
-│   │   └── rateLimiter.ts      # Rate limiting middleware
 │   ├── tools/                  # Tool registration system
 │   │   └── register-tools.ts   # Central tool registry ← UNDERSTAND THIS
 │   └── types.ts                # TypeScript type definitions
@@ -272,7 +266,7 @@ CREATE TABLE prps (
   content TEXT NOT NULL,
   goals TEXT,
   target_users TEXT,
-  created_by VARCHAR(100) NOT NULL, -- GitHub username
+  created_by VARCHAR(100) NOT NULL, -- API key identifier or user ID
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   status VARCHAR(50) DEFAULT 'draft'
@@ -286,7 +280,7 @@ CREATE TABLE tasks (
   prp_id UUID REFERENCES prps(id) ON DELETE SET NULL,
   priority VARCHAR(20) DEFAULT 'medium',
   status VARCHAR(50) DEFAULT 'pending',
-  assigned_to VARCHAR(100), -- GitHub username
+  assigned_to VARCHAR(100), -- User identifier
   created_by VARCHAR(100) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -330,6 +324,15 @@ CREATE TABLE prp_parsing_history (
   error_message TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- API key permissions mapping
+CREATE TABLE api_key_permissions (
+  api_key_hash VARCHAR(255) PRIMARY KEY,
+  permissions VARCHAR(50) NOT NULL, -- 'admin', 'privileged', 'read-only'
+  user_identifier VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP
+);
 ```
 
 ### Known Gotchas & Critical Patterns
@@ -338,10 +341,7 @@ CREATE TABLE prp_parsing_history (
 // CRITICAL: Enhanced environment interface for new requirements
 interface Env {
   DATABASE_URL: string;
-  GITHUB_CLIENT_ID: string;
-  GITHUB_CLIENT_SECRET: string;
-  COOKIE_ENCRYPTION_KEY: string;
-  OAUTH_KV: KVNamespace;
+  VALID_API_KEYS: string; // Comma-separated list of valid API keys
   
   // NS API Configuration
   NS_API_KEY: string; // Ocp-Apim-Subscription-Key for NS APIs
@@ -360,6 +360,24 @@ const USER_PERMISSIONS = {
   PRIVILEGED: new Set(['privileged_user', 'project_manager']), // Write access to tasks/PRPs
   READ_ONLY: new Set(['readonly_user', 'viewer']) // Read-only access to data
 } as const;
+
+// CRITICAL: API key authentication pattern (from auth.ts)
+const validKeys = process.env.VALID_API_KEYS
+  ? process.env.VALID_API_KEYS.split(",").map(key => key.trim())
+  : [
+      "abc123xyz", // fallback for dev/test
+      "def456uvw",
+    ];
+
+export function validateApiKey(apiKey?: string): void {
+  if (!apiKey) {
+    throw new Error("Unauthorized: Missing API key");
+  }
+
+  if (!validKeys.includes(apiKey)) {
+    throw new Error("Unauthorized: Invalid API key");
+  }
+}
 
 // CRITICAL: Anthropic API integration pattern
 async function parseWithAnthropic(prpContent: string, apiKey: string, model: string) {
@@ -439,12 +457,10 @@ async function createTasksFromPRP(prpId: string, tasks: ParsedTask[], db: postgr
 ### Data Models & Types
 
 ```typescript
-// Enhanced user props with permission levels
+// Enhanced user props with API key-based authentication
 type Props = {
-  login: string;
-  name: string;
-  email: string;
-  accessToken: string;
+  apiKey: string;
+  userIdentifier: string;
   permissions: 'admin' | 'privileged' | 'read-only';
 };
 
@@ -537,10 +553,11 @@ const NSStationSearchSchema = z.object({
 Task 1 - Enhanced Project Setup:
   UPDATE existing configuration:
     - MODIFY wrangler.jsonc to add new environment variables
-    - UPDATE .dev.vars.example with NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+    - UPDATE .dev.vars.example with VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
     - INSTALL additional dependencies: axios for HTTP requests, @anthropic-ai/sdk if preferred
 
   CREATE new environment variables:
+    - ADD VALID_API_KEYS for API key authentication
     - ADD NS_API_KEY for NS API authentication
     - ADD ANTHROPIC_API_KEY for AI parsing capabilities
     - ADD ANTHROPIC_MODEL for model selection (default: claude-3-5-sonnet-20241022)
@@ -548,6 +565,7 @@ Task 1 - Enhanced Project Setup:
 Task 2 - Database Schema Enhancement:
   CREATE enhanced database schema:
     - RUN the provided schema.sql to create PRPs, tasks, tags, and related tables
+    - ADD api_key_permissions table for API key management
     - ADD indexes for performance on frequently queried columns
     - CREATE database migration script if needed
 
@@ -579,7 +597,7 @@ Task 4 - Enhanced MCP Tool Registration:
 
   UPDATE central tool registry:
     - MODIFY src/tools/register-tools.ts to import and register all new tools
-    - IMPLEMENT permission-based tool registration
+    - IMPLEMENT permission-based tool registration using API key authentication
     - ADD proper error handling and logging for each tool
 
 Task 5 - Core Business Logic Implementation:
@@ -603,7 +621,7 @@ Task 6 - Enhanced Validation and Error Handling:
     - CREATE standardized error responses
 
   UPDATE security measures:
-    - EXTEND permission checking for new operations
+    - EXTEND permission checking for new operations using API key system
     - ADD API key validation for NS API calls
     - IMPLEMENT rate limiting for AI parsing operations
     - ADD audit logging for sensitive operations
@@ -617,15 +635,15 @@ Task 7 - Testing Infrastructure:
 
   UPDATE existing tests:
     - EXTEND existing test fixtures for new data models
-    - ADD permission-based access tests
+    - ADD permission-based access tests using API keys
     - CREATE end-to-end workflow tests
 
 Task 8 - Enhanced MCP Server Configuration:
   UPDATE main server files:
-    - MODIFY src/index.ts to integrate all new functionality
+    - MODIFY src/index.ts to integrate all new functionality with API key authentication
     - UPDATE src/index_sentry.ts with enhanced monitoring
     - ADD new environment variable handling
-    - IMPLEMENT enhanced user permission system
+    - IMPLEMENT enhanced user permission system based on API keys
 
   CREATE additional utilities:
     - ADD configuration validation on startup
@@ -637,7 +655,7 @@ Task 9 - Local Development Testing:
     - VERIFY all NS API integrations work correctly
     - TEST Anthropic AI parsing with sample PRPs
     - VALIDATE all CRUD operations for tasks and PRPs
-    - VERIFY permission systems work as expected
+    - VERIFY permission systems work as expected with API keys
     - TEST error handling and recovery scenarios
 
 Task 10 - Production Deployment:
@@ -659,8 +677,9 @@ import { Props } from "../types";
 import { z } from "zod";
 import { parseWithAnthropic } from "../api/anthropic";
 import { createPRP, updatePRP, getPRPById } from "../database/prp-operations";
+import { validateApiKey } from "../server/auth";
 
-const PRIVILEGED_USERS = new Set(['admin_user', 'project_manager']);
+const PRIVILEGED_PERMISSIONS = new Set(['admin', 'privileged']);
 
 export function registerPRPTools(server: McpServer, env: Env, props: Props) {
   // Available to all authenticated users
@@ -675,6 +694,8 @@ export function registerPRPTools(server: McpServer, env: Env, props: Props) {
     },
     async ({ status, createdBy, limit, offset }) => {
       try {
+        validateApiKey(props.apiKey);
+        
         return await withDatabase(env.DATABASE_URL, async (db) => {
           let query = db`SELECT * FROM prps WHERE 1=1`;
           
@@ -697,13 +718,15 @@ export function registerPRPTools(server: McpServer, env: Env, props: Props) {
   );
 
   // Only for privileged users
-  if (PRIVILEGED_USERS.has(props.login)) {
+  if (PRIVILEGED_PERMISSIONS.has(props.permissions)) {
     server.tool(
       "parsePRP",
       "Use AI to extract tasks from a PRP document",
       PRPParsingSchema,
       async ({ prpId, content, extractGoals, extractTargetUsers }) => {
         try {
+          validateApiKey(props.apiKey);
+          
           // Parse with Anthropic
           const parsed = await parseWithAnthropic(
             content, 
@@ -713,7 +736,7 @@ export function registerPRPTools(server: McpServer, env: Env, props: Props) {
 
           // Save extracted tasks to database
           return await withDatabase(env.DATABASE_URL, async (db) => {
-            const tasks = await createTasksFromPRP(prpId, parsed.tasks, props.login, db);
+            const tasks = await createTasksFromPRP(prpId, parsed.tasks, props.userIdentifier, db);
             
             return {
               content: [{
@@ -739,6 +762,8 @@ export function registerNSTools(server: McpServer, env: Env, props: Props) {
     NSStationSearchSchema,
     async ({ q, limit, countryCodes, includeNonPlannableStations }) => {
       try {
+        validateApiKey(props.apiKey);
+        
         const stations = await callNSAPI(
           'https://gateway.apiportal.ns.nl/nsapp-stations/v3',
           { q, limit, countryCodes, includeNonPlannableStations },
@@ -768,6 +793,8 @@ export function registerNSTools(server: McpServer, env: Env, props: Props) {
     },
     async ({ lat, lng, limit, includeNonPlannableStations }) => {
       try {
+        validateApiKey(props.apiKey);
+        
         const stations = await callNSAPI(
           'https://gateway.apiportal.ns.nl/nsapp-stations/v3/nearest',
           { lat, lng, limit, includeNonPlannableStations },
@@ -792,18 +819,17 @@ export function registerNSTools(server: McpServer, env: Env, props: Props) {
 
 ```yaml
 CLOUDFLARE_WORKERS:
-  - wrangler.jsonc: Add NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL to environment
+  - wrangler.jsonc: Add VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL to environment
   - Durable Objects: Enhanced MCP agent binding for complex state management
-  - KV Storage: OAuth state plus optional caching for NS API responses
   - Secrets: All API keys stored as Cloudflare Workers secrets
 
-GITHUB_OAUTH:
+API_KEY_AUTHENTICATION:
   - Enhanced permission system: admin, privileged, read-only access levels
-  - User context: GitHub login mapped to permission levels
-  - Session management: Extended session data with permission caching
+  - User context: API key mapped to permission levels and user identifiers
+  - Request validation: API key validation on every request
 
 DATABASE:
-  - Enhanced PostgreSQL schema: PRPs, tasks, tags, documentation, parsing history
+  - Enhanced PostgreSQL schema: PRPs, tasks, tags, documentation, parsing history, API key permissions
   - Connection pooling: Optimized for increased concurrent operations
   - Transactions: Multi-table operations for complex workflows
   - Indexing: Performance optimization for frequent queries
@@ -817,13 +843,13 @@ EXTERNAL_APIS:
 ENVIRONMENT_VARIABLES:
   - Development: .dev.vars with all API keys and configuration
   - Production: Cloudflare Workers secrets
-  - Required: DATABASE_URL, GITHUB_CLIENT_*, COOKIE_ENCRYPTION_KEY, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+  - Required: DATABASE_URL, VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
   - Optional: SENTRY_DSN for monitoring
 
 RATE_LIMITING:
   - NS API: Respect rate limits and implement backoff strategies
   - Anthropic API: Cost-conscious usage with request validation
-  - MCP Tools: Per-user rate limiting for expensive operations
+  - MCP Tools: Per-API-key rate limiting for expensive operations
 ```
 
 ## Validation Gate
@@ -877,16 +903,13 @@ curl -X POST https://api.anthropic.com/v1/messages \
 # Start local development server
 wrangler dev
 
-# Test OAuth flow (should redirect to GitHub)
-curl -v http://localhost:8787/authorize
-
-# Test MCP endpoint (should return server info)
-curl -v http://localhost:8787/mcp
+# Test API key authentication (should return server info with valid key)
+curl -H "x-api-key: abc123xyz" http://localhost:8787/mcp
 
 # Test tool functionality with MCP Inspector
 npx @modelcontextprotocol/inspector@latest http://localhost:8787/mcp
 
-# Expected: Server starts, OAuth redirects, MCP tools accessible
+# Expected: Server starts, API key authentication works, MCP tools accessible
 # If errors: Check console output, verify environment variables, fix configuration
 ```
 
@@ -910,8 +933,8 @@ npm run test:e2e                 # End-to-end workflow tests
 - [ ] Database schema: All tables created and accessible
 - [ ] External APIs: NS and Anthropic APIs respond correctly
 - [ ] Local server starts: `wrangler dev` runs without errors
-- [ ] MCP endpoint responds: `curl http://localhost:8787/mcp` returns server info
-- [ ] OAuth flow works: Authentication redirects and completes successfully
+- [ ] MCP endpoint responds: `curl -H "x-api-key: validkey" http://localhost:8787/mcp` returns server info
+- [ ] API key authentication: Valid keys accepted, invalid keys rejected
 
 ### NS API Integration
 
@@ -985,4 +1008,4 @@ npm run test:e2e                 # End-to-end workflow tests
 - ❌ Don't ignore TypeScript errors - fix all type issues before deployment
 - ❌ Don't skip permission testing - validate access control scenarios
 
-This comprehensive PRP provides all the context, patterns, and implementation details needed to build a production-ready MCP server that combines NS Railways API access with intelligent PRP management and task extraction capabilities.
+This comprehensive PRP provides all the context, patterns, and implementation details needed to build a production-ready MCP server that combines NS Railways API access with intelligent PRP management and task extraction capabilities using API key authentication instead of GitHub OAuth.
