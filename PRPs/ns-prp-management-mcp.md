@@ -5,7 +5,7 @@ description: A comprehensive MCP server providing Dutch Railways API access with
 
 ## Purpose
 
-Production-ready MCP server that combines Dutch Railways (NS) API access with intelligent PRP (Product Requirement Prompt) management. Uses API key authentication, PostgreSQL database, Anthropic AI for PRP parsing, and provides comprehensive task/documentation CRUD operations.
+Production-ready MCP server that combines Dutch Railways (NS) API access with comprehensive task and documentation management. Uses API key authentication, PostgreSQL database, and provides complete CRUD operations for tasks, documentation, and project organization.
 
 ## Core Principles
 
@@ -13,7 +13,7 @@ Production-ready MCP server that combines Dutch Railways (NS) API access with in
 2. **Validation Loops**: Comprehensive testing from TypeScript compilation to production deployment
 3. **Security First**: API key authentication with role-based access, SQL injection protection, API key management
 4. **Production Ready**: Cloudflare Workers deployment with monitoring and error handling
-5. **AI Integration**: Seamless Anthropic API integration for intelligent PRP parsing
+5. **Data Management**: Comprehensive task and documentation organization with tagging system
 
 ---
 
@@ -22,20 +22,19 @@ Production-ready MCP server that combines Dutch Railways (NS) API access with in
 Build a production-ready MCP (Model Context Protocol) server with:
 
 - **NS Railways API Integration** - Secure access to Dutch public transport data
-- **AI-Powered PRP Parsing** - Anthropic-based extraction of tasks from PRPs
 - **Task Management System** - Complete CRUD operations for tasks, documentation, and tags
 - **API Key Authentication** - Role-based access control with user permissions
-- **PostgreSQL Database** - Structured storage for tasks, PRPs, and metadata
+- **PostgreSQL Database** - Structured storage for tasks, projects, and metadata
 - **Cloudflare Workers Deployment** - Global edge deployment with monitoring
 
 ## Why
 
 - **Developer Productivity**: Enable AI assistants to manage Dutch transport data and project requirements
 - **Enterprise Security**: API key authentication with granular permission system and secure API key management
-- **AI-Enhanced Workflow**: Automated extraction of actionable tasks from requirement documents
+- **Streamlined Workflow**: Organized task and documentation management with tagging and filtering
 - **Scalability**: Cloudflare Workers global edge deployment with database connection pooling
 - **Integration**: Bridge between NS public APIs and internal project management systems
-- **User Value**: Streamlined PRP-to-task workflow with intelligent parsing and organization
+- **User Value**: Comprehensive task management with Dutch transport data integration
 
 ## What
 
@@ -52,16 +51,16 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - `getDisruptions` - Get current service disruptions (SpoorKaart API)
 - `getTravelInfo` - Access travel information (ReisinformatieAPI - requires parsing)
 
-**PRP Management & AI Parsing:**
-- `parsePRP` - Use Anthropic AI to extract tasks from PRP documents
-- `listPRPs` - Get all PRPs stored in database
-- `getPRPById` - Retrieve specific PRP with metadata
-- `updatePRPMetadata` - Modify PRP goals, target users, descriptions
+**Project Management:**
+- `listProjects` - Get all projects stored in database
+- `getProjectById` - Retrieve specific project with metadata
+- `createProject` - Create new project with goals and descriptions
+- `updateProject` - Modify project goals, target users, descriptions
 
 **Task Management:**
 - `listTasks` - Get all tasks with filtering and pagination
 - `getTaskById` - Retrieve specific task with full details
-- `createTask` - Create new task manually or from PRP parsing
+- `createTask` - Create new task manually with full details
 - `updateTask` - Modify task details, status, assignments
 - `deleteTask` - Remove task from system
 - `addTaskDocumentation` - Attach documentation to tasks
@@ -89,13 +88,13 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - Transaction support for multi-table operations
 - Read/write operation separation based on user permissions
 
-**AI Integration:**
+**Data Organization:**
 
-- Anthropic Claude API integration for PRP parsing
-- Configurable model selection (Claude 3.5 Sonnet, etc.)
-- Structured JSON output for task extraction
-- Context-aware parsing with project metadata
-- Error handling and fallback strategies
+- Comprehensive tagging system for tasks and projects
+- Advanced filtering and search capabilities
+- Structured data export and import functionality
+- Project timeline and milestone tracking
+- Automated status reporting and metrics
 
 **Deployment & Monitoring:**
 
@@ -111,8 +110,8 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - [ ] API key authentication flow works end-to-end (key validation → MCP access)
 - [ ] TypeScript compilation succeeds with no errors
 - [ ] All NS API integrations return correct data with proper error handling
-- [ ] Anthropic AI parsing extracts tasks accurately from PRP documents
-- [ ] Database CRUD operations work for tasks, PRPs, and tags
+- [ ] Task and project management system works with full CRUD operations
+- [ ] Database CRUD operations work for tasks, projects, and tags
 - [ ] User permissions prevent unauthorized access to sensitive operations
 - [ ] Local development server starts and responds correctly
 - [ ] Production deployment to Cloudflare Workers succeeds
@@ -127,10 +126,6 @@ Build a production-ready MCP (Model Context Protocol) server with:
 # CRITICAL MCP PATTERNS - Read these first
 - file: PRPs/ai_docs/mcp_patterns.md
   why: Core MCP development patterns, security practices, and error handling
-
-# ANTHROPIC API INTEGRATION - Essential for PRP parsing
-- file: PRPs/ai_docs/claude_api_usage.md
-  why: How to use the Anthropic API to get structured responses from Claude
 
 # TOOL REGISTRATION SYSTEM - Understand the modular approach
 - file: src/tools/register-tools.ts
@@ -234,50 +229,48 @@ Build a production-ready MCP (Model Context Protocol) server with:
 │   ├── api/                    # External API integrations
 │   │   ├── ns-stations.ts      # NS Stations API client
 │   │   ├── spoorkaart.ts       # SpoorKaart API client  
-│   │   ├── reisinformatie.ts   # Travel info API client
-│   │   └── anthropic.ts        # Anthropic AI API client
+│   │   └── reisinformatie.ts   # Travel info API client
 │   ├── tools/                  # Extended tool registration
 │   │   ├── ns-tools.ts         # NS API tools registration
-│   │   ├── prp-tools.ts        # PRP management tools
+│   │   ├── project-tools.ts    # Project management tools
 │   │   ├── task-tools.ts       # Task CRUD tools
 │   │   ├── tag-tools.ts        # Tag management tools
 │   │   └── register-tools.ts   # Updated central registry
 │   ├── database/
-│   │   ├── schema.sql          # Enhanced database schema for PRP/tasks
-│   │   ├── prp-operations.ts   # PRP-specific database operations
+│   │   ├── schema.sql          # Enhanced database schema for projects/tasks
+│   │   ├── project-operations.ts # Project-specific database operations
 │   │   └── task-operations.ts  # Task-specific database operations
 │   ├── lib/
-│   │   ├── prp-parser.ts       # AI-powered PRP parsing logic
 │   │   ├── validation.ts       # Enhanced Zod schemas
-│   │   └── response-helpers.ts # Standardized response formatting
+│   │   ├── response-helpers.ts # Standardized response formatting
+│   │   └── data-export.ts      # Data export and import utilities
 │   └── types/
 │       ├── ns-api.ts           # NS API response types
-│       ├── prp.ts              # PRP and task types
-│       └── anthropic.ts        # Anthropic API types
+│       └── project.ts          # Project and task types
 ```
 
 ### Enhanced Database Schema
 
 ```sql
--- PRPs table for storing requirement documents
-CREATE TABLE prps (
+-- Projects table for storing project information
+CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
+  description TEXT NOT NULL,
   goals TEXT,
   target_users TEXT,
   created_by VARCHAR(100) NOT NULL, -- API key identifier or user ID
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  status VARCHAR(50) DEFAULT 'draft'
+  status VARCHAR(50) DEFAULT 'active'
 );
 
--- Tasks extracted from PRPs or created manually
+-- Tasks for projects, created manually
 CREATE TABLE tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR(255) NOT NULL,
   description TEXT,
-  prp_id UUID REFERENCES prps(id) ON DELETE SET NULL,
+  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   priority VARCHAR(20) DEFAULT 'medium',
   status VARCHAR(50) DEFAULT 'pending',
   assigned_to VARCHAR(100), -- User identifier
@@ -314,17 +307,6 @@ CREATE TABLE task_documentation (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- PRP parsing history and AI metadata
-CREATE TABLE prp_parsing_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  prp_id UUID REFERENCES prps(id) ON DELETE CASCADE,
-  model_used VARCHAR(100) NOT NULL,
-  tasks_extracted INTEGER DEFAULT 0,
-  parsing_success BOOLEAN DEFAULT true,
-  error_message TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- API key permissions mapping
 CREATE TABLE api_key_permissions (
   api_key_hash VARCHAR(255) PRIMARY KEY,
@@ -345,10 +327,6 @@ interface Env {
   
   // NS API Configuration
   NS_API_KEY: string; // Ocp-Apim-Subscription-Key for NS APIs
-  
-  // Anthropic AI Configuration
-  ANTHROPIC_API_KEY: string;
-  ANTHROPIC_MODEL: string; // e.g., "claude-3-5-sonnet-20241022"
   
   // Optional monitoring
   SENTRY_DSN?: string;
@@ -379,33 +357,6 @@ export function validateApiKey(apiKey?: string): void {
   }
 }
 
-// CRITICAL: Anthropic API integration pattern
-async function parseWithAnthropic(prpContent: string, apiKey: string, model: string) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: 3000,
-      messages: [{
-        role: 'user',
-        content: buildPRPParsingPrompt(prpContent)
-      }]
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Anthropic API error: ${response.status}`);
-  }
-
-  const result = await response.json();
-  return JSON.parse(result.content[0].text);
-}
-
 // CRITICAL: NS API integration with proper authentication
 async function callNSAPI(endpoint: string, params: Record<string, any>, apiKey: string) {
   const url = new URL(endpoint);
@@ -428,24 +379,18 @@ async function callNSAPI(endpoint: string, params: Record<string, any>, apiKey: 
 }
 
 // CRITICAL: Enhanced database operations with transactions
-async function createTasksFromPRP(prpId: string, tasks: ParsedTask[], db: postgres.Sql) {
+async function createTasksForProject(projectId: string, tasks: TaskData[], userId: string, db: postgres.Sql) {
   return await db.begin(async (transaction) => {
     const createdTasks = [];
     
     for (const task of tasks) {
       const [created] = await transaction`
-        INSERT INTO tasks (title, description, prp_id, priority, created_by)
-        VALUES (${task.title}, ${task.description}, ${prpId}, ${task.priority || 'medium'}, ${task.createdBy})
+        INSERT INTO tasks (title, description, project_id, priority, created_by)
+        VALUES (${task.title}, ${task.description}, ${projectId}, ${task.priority || 'medium'}, ${userId})
         RETURNING *
       `;
       createdTasks.push(created);
     }
-    
-    // Update PRP parsing history
-    await transaction`
-      INSERT INTO prp_parsing_history (prp_id, model_used, tasks_extracted, parsing_success)
-      VALUES (${prpId}, ${task.modelUsed}, ${tasks.length}, true)
-    `;
     
     return createdTasks;
   });
@@ -464,24 +409,24 @@ type Props = {
   permissions: 'admin' | 'privileged' | 'read-only';
 };
 
-// PRP and Task data models
-interface PRP {
+// Project and Task data models
+interface Project {
   id: string;
   title: string;
-  content: string;
+  description: string;
   goals?: string;
   targetUsers?: string;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
-  status: 'draft' | 'active' | 'completed' | 'archived';
+  status: 'active' | 'completed' | 'archived' | 'on-hold';
 }
 
 interface Task {
   id: string;
   title: string;
   description?: string;
-  prpId?: string;
+  projectId?: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'in_progress' | 'completed' | 'blocked';
   assignedTo?: string;
@@ -523,17 +468,18 @@ interface NSStationV3 {
 // Zod validation schemas
 import { z } from "zod";
 
-const PRPParsingSchema = z.object({
-  prpId: z.string().uuid(),
-  content: z.string().min(100, "PRP content too short for meaningful parsing"),
-  extractGoals: z.boolean().default(true),
-  extractTargetUsers: z.boolean().default(true)
+const ProjectCreationSchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().min(10, "Project description should be descriptive"),
+  goals: z.string().optional(),
+  targetUsers: z.string().optional(),
+  status: z.enum(['active', 'completed', 'archived', 'on-hold']).default('active')
 });
 
 const TaskCreationSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().optional(),
-  prpId: z.string().uuid().optional(),
+  projectId: z.string().uuid().optional(),
   priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
   assignedTo: z.string().optional(),
   dueDate: z.string().datetime().optional()
@@ -553,25 +499,23 @@ const NSStationSearchSchema = z.object({
 Task 1 - Enhanced Project Setup:
   UPDATE existing configuration:
     - MODIFY wrangler.jsonc to add new environment variables
-    - UPDATE .dev.vars.example with VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
-    - INSTALL additional dependencies: axios for HTTP requests, @anthropic-ai/sdk if preferred
+    - UPDATE .dev.vars.example with VALID_API_KEYS, NS_API_KEY
+    - INSTALL additional dependencies: axios for HTTP requests
 
   CREATE new environment variables:
     - ADD VALID_API_KEYS for API key authentication
     - ADD NS_API_KEY for NS API authentication
-    - ADD ANTHROPIC_API_KEY for AI parsing capabilities
-    - ADD ANTHROPIC_MODEL for model selection (default: claude-3-5-sonnet-20241022)
 
 Task 2 - Database Schema Enhancement:
   CREATE enhanced database schema:
-    - RUN the provided schema.sql to create PRPs, tasks, tags, and related tables
+    - RUN the provided schema.sql to create projects, tasks, tags, and related tables
     - ADD api_key_permissions table for API key management
     - ADD indexes for performance on frequently queried columns
     - CREATE database migration script if needed
 
   UPDATE database operations:
     - EXTEND existing database utilities for new table operations
-    - CREATE prp-operations.ts for PRP-specific database functions
+    - CREATE project-operations.ts for project-specific database functions
     - CREATE task-operations.ts for task management functions
     - IMPLEMENT transaction support for multi-table operations
 
@@ -581,17 +525,12 @@ Task 3 - External API Integration:
     - CREATE src/api/spoorkaart.ts for route and disruption data
     - CREATE src/api/reisinformatie.ts for travel information (handle large responses)
     - IMPLEMENT proper error handling and rate limiting for each API
-
-  CREATE Anthropic API integration:
-    - CREATE src/api/anthropic.ts for AI parsing functionality
-    - IMPLEMENT PRP parsing prompt generation
-    - ADD structured JSON output parsing with validation
-    - HANDLE API errors and fallback strategies
+    - ADD data caching strategies for frequently requested information
 
 Task 4 - Enhanced MCP Tool Registration:
   CREATE modular tool files:
     - CREATE src/tools/ns-tools.ts for NS API tools
-    - CREATE src/tools/prp-tools.ts for PRP management
+    - CREATE src/tools/project-tools.ts for project management
     - CREATE src/tools/task-tools.ts for task CRUD operations
     - CREATE src/tools/tag-tools.ts for tag management
 
@@ -601,11 +540,11 @@ Task 4 - Enhanced MCP Tool Registration:
     - ADD proper error handling and logging for each tool
 
 Task 5 - Core Business Logic Implementation:
-  CREATE PRP parsing logic:
-    - CREATE src/lib/prp-parser.ts with Anthropic integration
-    - IMPLEMENT task extraction from PRP content
-    - ADD metadata extraction (goals, target users)
-    - CREATE parsing history tracking
+  CREATE project management logic:
+    - CREATE src/lib/data-export.ts for data export/import functionality
+    - IMPLEMENT project timeline and milestone tracking
+    - ADD project status workflow management
+    - CREATE project analytics and reporting features
 
   CREATE task management logic:
     - IMPLEMENT full CRUD operations for tasks
@@ -623,13 +562,13 @@ Task 6 - Enhanced Validation and Error Handling:
   UPDATE security measures:
     - EXTEND permission checking for new operations using API key system
     - ADD API key validation for NS API calls
-    - IMPLEMENT rate limiting for AI parsing operations
+    - IMPLEMENT rate limiting for expensive database operations
     - ADD audit logging for sensitive operations
 
 Task 7 - Testing Infrastructure:
   CREATE comprehensive tests:
     - ADD unit tests for all new API integrations
-    - CREATE integration tests for PRP parsing workflow
+    - CREATE integration tests for project management workflow
     - ADD database operation tests with transaction support
     - IMPLEMENT mock services for external APIs
 
@@ -653,8 +592,8 @@ Task 8 - Enhanced MCP Server Configuration:
 Task 9 - Local Development Testing:
   TEST complete functionality:
     - VERIFY all NS API integrations work correctly
-    - TEST Anthropic AI parsing with sample PRPs
-    - VALIDATE all CRUD operations for tasks and PRPs
+    - TEST project management functionality with sample data
+    - VALIDATE all CRUD operations for tasks and projects
     - VERIFY permission systems work as expected with API keys
     - TEST error handling and recovery scenarios
 
@@ -671,23 +610,22 @@ Task 10 - Production Deployment:
 
 ```typescript
 // Task 4 - Example Tool Implementation Pattern
-// src/tools/prp-tools.ts
+// src/tools/project-tools.ts
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Props } from "../types";
 import { z } from "zod";
-import { parseWithAnthropic } from "../api/anthropic";
-import { createPRP, updatePRP, getPRPById } from "../database/prp-operations";
+import { createProject, updateProject, getProjectById } from "../database/project-operations";
 import { validateApiKey } from "../server/auth";
 
 const PRIVILEGED_PERMISSIONS = new Set(['admin', 'privileged']);
 
-export function registerPRPTools(server: McpServer, env: Env, props: Props) {
+export function registerProjectTools(server: McpServer, env: Env, props: Props) {
   // Available to all authenticated users
   server.tool(
-    "listPRPs",
-    "Get all PRPs with optional filtering",
+    "listProjects",
+    "Get all projects with optional filtering",
     {
-      status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+      status: z.enum(['active', 'completed', 'archived', 'on-hold']).optional(),
       createdBy: z.string().optional(),
       limit: z.number().int().min(1).max(100).default(20),
       offset: z.number().int().min(0).default(0)
@@ -697,22 +635,22 @@ export function registerPRPTools(server: McpServer, env: Env, props: Props) {
         validateApiKey(props.apiKey);
         
         return await withDatabase(env.DATABASE_URL, async (db) => {
-          let query = db`SELECT * FROM prps WHERE 1=1`;
+          let query = db`SELECT * FROM projects WHERE 1=1`;
           
           if (status) query = db`${query} AND status = ${status}`;
           if (createdBy) query = db`${query} AND created_by = ${createdBy}`;
           
-          const prps = await db`${query} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+          const projects = await db`${query} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
           
           return {
             content: [{
               type: "text",
-              text: `**PRPs Found:** ${prps.length}\n\n${formatPRPList(prps)}`
+              text: `**Projects Found:** ${projects.length}\n\n${formatProjectList(projects)}`
             }]
           };
         });
       } catch (error) {
-        return createErrorResponse(`Failed to list PRPs: ${error.message}`);
+        return createErrorResponse(`Failed to list projects: ${error.message}`);
       }
     }
   );
@@ -720,33 +658,29 @@ export function registerPRPTools(server: McpServer, env: Env, props: Props) {
   // Only for privileged users
   if (PRIVILEGED_PERMISSIONS.has(props.permissions)) {
     server.tool(
-      "parsePRP",
-      "Use AI to extract tasks from a PRP document",
-      PRPParsingSchema,
-      async ({ prpId, content, extractGoals, extractTargetUsers }) => {
+      "createProject",
+      "Create a new project with goals and descriptions",
+      ProjectCreationSchema,
+      async ({ title, description, goals, targetUsers, status }) => {
         try {
           validateApiKey(props.apiKey);
-          
-          // Parse with Anthropic
-          const parsed = await parseWithAnthropic(
-            content, 
-            env.ANTHROPIC_API_KEY, 
-            env.ANTHROPIC_MODEL
-          );
 
-          // Save extracted tasks to database
           return await withDatabase(env.DATABASE_URL, async (db) => {
-            const tasks = await createTasksFromPRP(prpId, parsed.tasks, props.userIdentifier, db);
+            const [project] = await db`
+              INSERT INTO projects (title, description, goals, target_users, status, created_by)
+              VALUES (${title}, ${description}, ${goals}, ${targetUsers}, ${status}, ${props.userIdentifier})
+              RETURNING *
+            `;
             
             return {
               content: [{
                 type: "text",
-                text: `**PRP Parsing Complete**\n\n**Tasks Extracted:** ${tasks.length}\n\n**Tasks Created:**\n${formatTaskList(tasks)}`
+                text: `**Project Created Successfully**\n\n**Title:** ${project.title}\n**Description:** ${project.description}\n**Status:** ${project.status}`
               }]
             };
           });
         } catch (error) {
-          return createErrorResponse(`PRP parsing failed: ${error.message}`);
+          return createErrorResponse(`Project creation failed: ${error.message}`);
         }
       }
     );
@@ -819,7 +753,7 @@ export function registerNSTools(server: McpServer, env: Env, props: Props) {
 
 ```yaml
 CLOUDFLARE_WORKERS:
-  - wrangler.jsonc: Add VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL to environment
+  - wrangler.jsonc: Add VALID_API_KEYS, NS_API_KEY to environment
   - Durable Objects: Enhanced MCP agent binding for complex state management
   - Secrets: All API keys stored as Cloudflare Workers secrets
 
@@ -829,7 +763,7 @@ API_KEY_AUTHENTICATION:
   - Request validation: API key validation on every request
 
 DATABASE:
-  - Enhanced PostgreSQL schema: PRPs, tasks, tags, documentation, parsing history, API key permissions
+  - Enhanced PostgreSQL schema: projects, tasks, tags, documentation, API key permissions
   - Connection pooling: Optimized for increased concurrent operations
   - Transactions: Multi-table operations for complex workflows
   - Indexing: Performance optimization for frequent queries
@@ -838,17 +772,16 @@ EXTERNAL_APIS:
   - NS Stations API: Station search and location services
   - SpoorKaart API: Route geometry and disruption information  
   - ReisinformatieAPI: Comprehensive travel information (handle large responses)
-  - Anthropic API: AI-powered PRP parsing and task extraction
 
 ENVIRONMENT_VARIABLES:
   - Development: .dev.vars with all API keys and configuration
   - Production: Cloudflare Workers secrets
-  - Required: DATABASE_URL, VALID_API_KEYS, NS_API_KEY, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+  - Required: DATABASE_URL, VALID_API_KEYS, NS_API_KEY
   - Optional: SENTRY_DSN for monitoring
 
 RATE_LIMITING:
   - NS API: Respect rate limits and implement backoff strategies
-  - Anthropic API: Cost-conscious usage with request validation
+  - Database Operations: Connection pooling and query optimization
   - MCP Tools: Per-API-key rate limiting for expensive operations
 ```
 
@@ -886,14 +819,7 @@ npm run test:database             # Database integration tests
 curl -H "Ocp-Apim-Subscription-Key: $NS_API_KEY" \
   "https://gateway.apiportal.ns.nl/nsapp-stations/v3?q=amsterdam&limit=5"
 
-# Test Anthropic API integration  
-curl -X POST https://api.anthropic.com/v1/messages \
-  -H "x-api-key: $ANTHROPIC_API_KEY" \
-  -H "anthropic-version: 2023-06-01" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"claude-3-5-sonnet-20241022","max_tokens":100,"messages":[{"role":"user","content":"Hello"}]}'
-
-# Expected: Valid responses from both APIs
+# Expected: Valid response from NS API
 # If errors: Check API keys, rate limits, network connectivity
 ```
 
@@ -931,7 +857,7 @@ npm run test:e2e                 # End-to-end workflow tests
 
 - [ ] TypeScript compilation: `npm run type-check` passes
 - [ ] Database schema: All tables created and accessible
-- [ ] External APIs: NS and Anthropic APIs respond correctly
+- [ ] External APIs: NS APIs respond correctly
 - [ ] Local server starts: `wrangler dev` runs without errors
 - [ ] MCP endpoint responds: `curl -H "x-api-key: validkey" http://localhost:8787/mcp` returns server info
 - [ ] API key authentication: Valid keys accepted, invalid keys rejected
@@ -944,17 +870,17 @@ npm run test:e2e                 # End-to-end workflow tests
 - [ ] Disruption information accessible
 - [ ] Proper error handling for API failures and rate limits
 
-### AI-Powered PRP Management
+### Project Management System
 
-- [ ] Anthropic API integration extracts tasks from PRPs
-- [ ] PRP parsing creates proper database records
-- [ ] Task extraction includes metadata (goals, target users)
-- [ ] Parsing history tracked correctly
-- [ ] Error handling for AI parsing failures
+- [ ] Project creation and management works correctly
+- [ ] Project metadata (goals, target users) handled properly
+- [ ] Project status workflows function as expected
+- [ ] Data export and import functionality operational
+- [ ] Project analytics and reporting features work
 
 ### Task Management System
 
-- [ ] Full CRUD operations work for tasks, PRPs, and tags
+- [ ] Full CRUD operations work for tasks, projects, and tags
 - [ ] Task assignment and status updates function correctly
 - [ ] Documentation attachment system operational
 - [ ] Tag-based filtering and organization works
@@ -965,7 +891,7 @@ npm run test:e2e                 # End-to-end workflow tests
 - [ ] User permissions prevent unauthorized access to sensitive operations
 - [ ] SQL injection protection active for all database operations
 - [ ] API key validation working for external service calls
-- [ ] Rate limiting prevents abuse of expensive operations
+- [ ] Rate limiting prevents abuse of database operations
 - [ ] Error messages don't leak sensitive system information
 
 ### Production Readiness
@@ -994,12 +920,12 @@ npm run test:e2e                 # End-to-end workflow tests
 - ❌ Don't skip connection pooling - use withDatabase wrapper consistently
 - ❌ Don't expose sensitive data in error messages
 
-### AI Integration
+### Data Management
 
-- ❌ Don't send sensitive data to external AI services without user consent
-- ❌ Don't ignore AI parsing failures - implement proper fallback strategies
-- ❌ Don't skip prompt engineering - craft clear, structured prompts
-- ❌ Don't ignore token limits and costs - validate input size
+- ❌ Don't skip data validation - validate all input data with Zod schemas
+- ❌ Don't ignore export/import failures - implement proper error handling
+- ❌ Don't skip data integrity checks - validate relationships between entities
+- ❌ Don't ignore performance - optimize queries and use appropriate indexes
 
 ### Development Process
 
