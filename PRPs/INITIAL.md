@@ -2,7 +2,7 @@
 
 We want to create a MCP server using this repos template
 
-The goal of the MCP server is to create a simple version of taskmaster mcp that instead of parsing PRDs we parse PRPs.
+The goal of the MCP server is to provide an interface for LLM models to the Dutch Railways NS API using custom API key auth and rate limiting.
 
 Additional features:
 
@@ -23,7 +23,7 @@ We need:
 
 ## EXAMPLES & DOCUMENTATION:
 
-All examples are already referenced in prp_mcp_base.md - do any additional research as needed.
+All examples are already referenced in prp_ns_mcp.md - do any additional research as needed.
 
 ## OTHER CONSIDERATIONS:
 
