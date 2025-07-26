@@ -1,11 +1,11 @@
 ---
-name: "NS PRP Management MCP Server"
-description: A comprehensive MCP server providing Dutch Railways API access with AI-powered PRP parsing and task management capabilities.
+name: "NS Travel Information MCP Server"
+description: A comprehensive MCP server providing AI agents with access to Dutch Railways (NS) API for travel planning and station information.
 ---
 
 ## Purpose
 
-Production-ready MCP server that combines Dutch Railways (NS) API access with comprehensive task and documentation management. Uses API key authentication, PostgreSQL database, and provides complete CRUD operations for tasks, documentation, and project organization.
+Production-ready MCP server that provides AI agents with seamless access to Dutch Railways (NS) API data for travel planning. Enables AI agents to query train stations, routes, disruptions, and travel information through a clear, standardized interface. Uses API key authentication and optimized data retrieval for real-time travel assistance.
 
 ## Core Principles
 
@@ -21,20 +21,20 @@ Production-ready MCP server that combines Dutch Railways (NS) API access with co
 
 Build a production-ready MCP (Model Context Protocol) server with:
 
-- **NS Railways API Integration** - Secure access to Dutch public transport data
-- **Task Management System** - Complete CRUD operations for tasks, documentation, and tags
-- **API Key Authentication** - Role-based access control with user permissions
-- **PostgreSQL Database** - Structured storage for tasks, projects, and metadata
-- **Cloudflare Workers Deployment** - Global edge deployment with monitoring
+- **NS Railways API Integration** - Comprehensive access to Dutch train and station data
+- **AI Agent Interface** - Clear, standardized tools for travel planning queries
+- **Real-Time Information** - Current station data, routes, and service disruptions
+- **API Key Authentication** - Secure access control for API usage
+- **Cloudflare Workers Deployment** - Global edge deployment with caching and monitoring
 
 ## Why
 
-- **Developer Productivity**: Enable AI assistants to manage Dutch transport data and project requirements
-- **Enterprise Security**: API key authentication with granular permission system and secure API key management
-- **Streamlined Workflow**: Organized task and documentation management with tagging and filtering
-- **Scalability**: Cloudflare Workers global edge deployment with database connection pooling
-- **Integration**: Bridge between NS public APIs and internal project management systems
-- **User Value**: Comprehensive task management with Dutch transport data integration
+- **AI Agent Empowerment**: Enable AI assistants to provide accurate, real-time Dutch travel information
+- **Travel Planning**: Help users plan journeys with up-to-date station data, routes, and disruptions
+- **Standardized Interface**: Provide clear, consistent API access that AI agents can easily understand
+- **Real-Time Accuracy**: Deliver current information for reliable travel recommendations
+- **Integration Ready**: Bridge between NS public APIs and AI travel planning applications
+- **User Experience**: Enhance travel apps with comprehensive Dutch Railways data access
 
 ## What
 
@@ -51,50 +51,39 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - `getDisruptions` - Get current service disruptions (SpoorKaart API)
 - `getTravelInfo` - Access travel information (ReisinformatieAPI - requires parsing)
 
-**Project Management:**
-- `listProjects` - Get all projects stored in database
-- `getProjectById` - Retrieve specific project with metadata
-- `createProject` - Create new project with goals and descriptions
-- `updateProject` - Modify project goals, target users, descriptions
+**Route & Journey Planning:**
+- `getRouteGeometry` - Get detailed route geometry between stations
+- `planJourney` - Get travel options between two locations
+- `getJourneyDetails` - Get detailed information about a specific journey
+- `getTransferOptions` - Find connection possibilities at interchange stations
 
-**Task Management:**
-- `listTasks` - Get all tasks with filtering and pagination
-- `getTaskById` - Retrieve specific task with full details
-- `createTask` - Create new task manually with full details
-- `updateTask` - Modify task details, status, assignments
-- `deleteTask` - Remove task from system
-- `addTaskDocumentation` - Attach documentation to tasks
-- `updateTaskDocumentation` - Modify attached documentation
 
-**Tag & Organization:**
-- `listTags` - Get all available tags
-- `createTag` - Create new organizational tags
-- `assignTagsToTask` - Tag tasks for organization
-- `getTasksByTag` - Filter tasks by tag assignments
+
+
 
 **Authentication & Authorization:**
 
-- API key authentication with validation middleware
-- Role-based access control (read-only vs privileged users vs admin)
-- User context propagation to all MCP tools
-- Secure API key management and validation
-- Request-level authentication for all operations
+- API key authentication for secure access control
+- Simple validation middleware for all requests
+- Rate limiting to prevent API abuse
+- Secure management of NS API credentials
+- Request logging for monitoring and debugging
 
-**Database Integration:**
+**Data Caching & Performance:**
 
-- PostgreSQL with enhanced schema for PRP/task management
-- Connection pooling optimized for Cloudflare Workers
-- SQL injection protection and query validation
-- Transaction support for multi-table operations
-- Read/write operation separation based on user permissions
+- Intelligent caching of NS API responses
+- Connection pooling for optimal performance
+- Response compression for faster data transfer
+- Error handling with fallback strategies
+- Monitoring and alerting for service health
 
-**Data Organization:**
+**Data Processing:**
 
-- Comprehensive tagging system for tasks and projects
-- Advanced filtering and search capabilities
-- Structured data export and import functionality
-- Project timeline and milestone tracking
-- Automated status reporting and metrics
+- Real-time data parsing and formatting
+- Standardized response structures for AI agents
+- Multi-language support for station names
+- Coordinate conversion and mapping utilities
+- Travel time calculations and route optimization
 
 **Deployment & Monitoring:**
 
@@ -109,14 +98,14 @@ Build a production-ready MCP (Model Context Protocol) server with:
 - [ ] MCP server passes validation with MCP Inspector
 - [ ] API key authentication flow works end-to-end (key validation → MCP access)
 - [ ] TypeScript compilation succeeds with no errors
-- [ ] All NS API integrations return correct data with proper error handling
-- [ ] Task and project management system works with full CRUD operations
-- [ ] Database CRUD operations work for tasks, projects, and tags
-- [ ] User permissions prevent unauthorized access to sensitive operations
-- [ ] Local development server starts and responds correctly
+- [ ] All NS API integrations return accurate travel data with proper error handling
+- [ ] Station search and information retrieval works correctly
+- [ ] Route planning and journey information functions properly
+
+- [ ] Local development server starts and responds to travel queries
 - [ ] Production deployment to Cloudflare Workers succeeds
-- [ ] Rate limiting prevents API abuse
-- [ ] Error handling provides user-friendly messages without leaking system details
+- [ ] Rate limiting prevents API abuse while allowing normal travel queries
+- [ ] Error handling provides clear messages for travel planning failures
 
 ## All Needed Context
 
@@ -133,7 +122,7 @@ Build a production-ready MCP (Model Context Protocol) server with:
 
 # EXISTING MCP IMPLEMENTATION - Core patterns to follow
 - file: src/index.ts
-  why: Complete MCP server with authentication, database, and tools - MIRROR this pattern
+  why: Complete MCP server with authentication and tools - MIRROR this pattern
 
 - file: src/index_sentry.ts
   why: Sentry-enabled version for production monitoring - USE for production deployment
@@ -141,23 +130,6 @@ Build a production-ready MCP (Model Context Protocol) server with:
 # AUTHENTICATION PATTERNS - API Key implementation
 - file: src/server/auth.ts
   why: API key authentication implementation - USE this exact pattern for authentication
-
-# DATABASE INTEGRATION - Security and connection patterns
-- file: src/database/connection.ts
-  why: PostgreSQL connection pooling - USE these patterns
-
-- file: src/database/security.ts
-  why: SQL injection protection and validation - CRITICAL for database security
-
-- file: src/database/utils.ts
-  why: Database operation wrappers and error handling - FOLLOW these patterns
-
-# EXAMPLE TOOL IMPLEMENTATIONS - Study these patterns
-- file: examples/database-tools.ts
-  why: Database tools example showing best practices for tool creation and registration
-
-- file: examples/database-tools-sentry.ts
-  why: Same tools with Sentry integration for production monitoring
 
 # CLOUDFLARE WORKERS CONFIGURATION
 - file: wrangler.jsonc
@@ -224,119 +196,68 @@ Build a production-ready MCP (Model Context Protocol) server with:
 ### Desired Codebase Tree (Files to add/modify)
 
 ```bash
-# New files to create for NS + PRP management functionality
+# New files to create for NS travel information functionality
 ├── src/
 │   ├── api/                    # External API integrations
 │   │   ├── ns-stations.ts      # NS Stations API client
-│   │   ├── spoorkaart.ts       # SpoorKaart API client  
-│   │   └── reisinformatie.ts   # Travel info API client
-│   ├── tools/                  # Extended tool registration
-│   │   ├── ns-tools.ts         # NS API tools registration
-│   │   ├── project-tools.ts    # Project management tools
-│   │   ├── task-tools.ts       # Task CRUD tools
-│   │   ├── tag-tools.ts        # Tag management tools
+│   │   ├── spoorkaart.ts       # SpoorKaart API client (routes, disruptions)
+│   │   └── reisinformatie.ts   # Travel info API client (journey planning)
+│   ├── tools/                  # Travel-focused tool registration
+│   │   ├── station-tools.ts    # Station search and information tools
+│   │   ├── journey-tools.ts    # Journey planning and route tools
+│   │   ├── service-tools.ts    # Service status and disruption tools
+│   │   ├── travel-tools.ts     # Travel advice and information tools
 │   │   └── register-tools.ts   # Updated central registry
-│   ├── database/
-│   │   ├── schema.sql          # Enhanced database schema for projects/tasks
-│   │   ├── project-operations.ts # Project-specific database operations
-│   │   └── task-operations.ts  # Task-specific database operations
 │   ├── lib/
-│   │   ├── validation.ts       # Enhanced Zod schemas
+│   │   ├── validation.ts       # Zod schemas for travel data
 │   │   ├── response-helpers.ts # Standardized response formatting
-│   │   └── data-export.ts      # Data export and import utilities
+│   │   ├── data-cache.ts       # Caching utilities for NS API responses
+│   │   └── travel-utils.ts     # Travel calculation and conversion utilities
 │   └── types/
 │       ├── ns-api.ts           # NS API response types
-│       └── project.ts          # Project and task types
+│       ├── station.ts          # Station and facility types
+│       ├── journey.ts          # Journey and route types
+│       └── service.ts          # Service status and disruption types
 ```
 
-### Enhanced Database Schema
+### Data Caching Strategy
 
-```sql
--- Projects table for storing project information
-CREATE TABLE projects (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  goals TEXT,
-  target_users TEXT,
-  created_by VARCHAR(100) NOT NULL, -- API key identifier or user ID
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  status VARCHAR(50) DEFAULT 'active'
-);
+The MCP server is stateless and queries NS APIs directly. Optional caching can be implemented for performance:
 
--- Tasks for projects, created manually
-CREATE TABLE tasks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
-  priority VARCHAR(20) DEFAULT 'medium',
-  status VARCHAR(50) DEFAULT 'pending',
-  assigned_to VARCHAR(100), -- User identifier
-  created_by VARCHAR(100) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  due_date TIMESTAMP
-);
+```typescript
+// Optional caching for frequently requested data
+interface CacheConfig {
+  stationList: { ttl: 3600 },      // Cache station list for 1 hour
+  stationDetails: { ttl: 1800 },   // Cache station details for 30 minutes  
+  disruptions: { ttl: 300 },       // Cache disruptions for 5 minutes
+  journeyPlans: { ttl: 600 },      // Cache journey plans for 10 minutes
+  routeGeometry: { ttl: 86400 }    // Cache route geometry for 24 hours
+}
 
--- Tags for organizing tasks and PRPs
-CREATE TABLE tags (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) UNIQUE NOT NULL,
-  color VARCHAR(7), -- Hex color code
-  created_by VARCHAR(100) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Task-Tag relationships
-CREATE TABLE task_tags (
-  task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
-  tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
-  PRIMARY KEY (task_id, tag_id)
-);
-
--- Documentation attached to tasks
-CREATE TABLE task_documentation (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
-  title VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
-  created_by VARCHAR(100) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- API key permissions mapping
-CREATE TABLE api_key_permissions (
-  api_key_hash VARCHAR(255) PRIMARY KEY,
-  permissions VARCHAR(50) NOT NULL, -- 'admin', 'privileged', 'read-only'
-  user_identifier VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP
-);
+// Simple in-memory cache for Cloudflare Workers
+const cache = new Map<string, { data: any, expires: number }>();
 ```
 
 ### Known Gotchas & Critical Patterns
 
 ```typescript
-// CRITICAL: Enhanced environment interface for new requirements
+// CRITICAL: Environment interface for travel information server
 interface Env {
-  DATABASE_URL: string;
   VALID_API_KEYS: string; // Comma-separated list of valid API keys
   
   // NS API Configuration
   NS_API_KEY: string; // Ocp-Apim-Subscription-Key for NS APIs
   
-  // Optional monitoring
+  // Optional monitoring and caching
   SENTRY_DSN?: string;
+  CACHE_ENABLED?: boolean;
 }
 
-// CRITICAL: User permission levels for enhanced functionality
-const USER_PERMISSIONS = {
-  ADMIN: new Set(['admin_user']), // Full access including user management
-  PRIVILEGED: new Set(['privileged_user', 'project_manager']), // Write access to tasks/PRPs
-  READ_ONLY: new Set(['readonly_user', 'viewer']) // Read-only access to data
+// CRITICAL: Simple authentication for travel data access
+const TRAVEL_ACCESS_LEVELS = {
+  FULL: new Set(['admin', 'premium']), // Full access to all travel data
+  STANDARD: new Set(['standard']), // Standard travel information access  
+  BASIC: new Set(['basic']) // Basic station and route information
 } as const;
 
 // CRITICAL: API key authentication pattern (from auth.ts)
@@ -378,22 +299,34 @@ async function callNSAPI(endpoint: string, params: Record<string, any>, apiKey: 
   return await response.json();
 }
 
-// CRITICAL: Enhanced database operations with transactions
-async function createTasksForProject(projectId: string, tasks: TaskData[], userId: string, db: postgres.Sql) {
-  return await db.begin(async (transaction) => {
-    const createdTasks = [];
-    
-    for (const task of tasks) {
-      const [created] = await transaction`
-        INSERT INTO tasks (title, description, project_id, priority, created_by)
-        VALUES (${task.title}, ${task.description}, ${projectId}, ${task.priority || 'medium'}, ${userId})
-        RETURNING *
-      `;
-      createdTasks.push(created);
+// CRITICAL: Travel data processing and caching
+async function getCachedOrFetch(cacheKey: string, fetchFn: () => Promise<any>, ttl: number = 300) {
+  if (cache.has(cacheKey)) {
+    const cached = cache.get(cacheKey)!;
+    if (Date.now() < cached.expires) {
+      return cached.data;
     }
-    
-    return createdTasks;
+    cache.delete(cacheKey);
+  }
+  
+  const data = await fetchFn();
+  cache.set(cacheKey, {
+    data,
+    expires: Date.now() + (ttl * 1000)
   });
+  
+  return data;
+}
+
+// CRITICAL: Format travel data for AI agents
+function formatStationForAgent(station: any) {
+  return {
+    code: station.code,
+    name: station.names?.long || station.name,
+    coordinates: station.location ? [station.location.lat, station.location.lng] : null,
+    facilities: station.stationFacilities || [],
+    accessibility: station.accessibility || 'unknown'
+  };
 }
 ```
 
@@ -402,49 +335,28 @@ async function createTasksForProject(projectId: string, tasks: TaskData[], userI
 ### Data Models & Types
 
 ```typescript
-// Enhanced user props with API key-based authentication
+// User context for API key-based authentication
 type Props = {
   apiKey: string;
-  userIdentifier: string;
-  permissions: 'admin' | 'privileged' | 'read-only';
+  accessLevel: 'full' | 'standard' | 'basic';
 };
 
-// Project and Task data models
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  goals?: string;
-  targetUsers?: string;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-  status: 'active' | 'completed' | 'archived' | 'on-hold';
-}
-
-interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  projectId?: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'pending' | 'in_progress' | 'completed' | 'blocked';
-  assignedTo?: string;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-  dueDate?: Date;
-  tags?: Tag[];
-  documentation?: TaskDocumentation[];
-}
-
-interface Tag {
-  id: string;
+// Travel data models for AI agents
+interface Station {
+  code: string;
+  uicCode?: string;
   name: string;
-  color?: string;
-  createdBy: string;
-  createdAt: Date;
+  alternativeNames?: string[];
+  coordinates?: [number, number]; // [lat, lng]
+  stationType: string;
+  country: string;
+  facilities?: StationFacility[];
+  accessibility?: AccessibilityInfo;
 }
+
+
+
+
 
 // NS API response types
 interface NSStationV3 {
@@ -468,219 +380,209 @@ interface NSStationV3 {
 // Zod validation schemas
 import { z } from "zod";
 
-const ProjectCreationSchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string().min(10, "Project description should be descriptive"),
-  goals: z.string().optional(),
-  targetUsers: z.string().optional(),
-  status: z.enum(['active', 'completed', 'archived', 'on-hold']).default('active')
-});
-
-const TaskCreationSchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string().optional(),
-  projectId: z.string().uuid().optional(),
-  priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
-  assignedTo: z.string().optional(),
-  dueDate: z.string().datetime().optional()
-});
-
-const NSStationSearchSchema = z.object({
-  q: z.string().min(2).optional(),
+const StationSearchSchema = z.object({
+  query: z.string().min(2, "Search query must be at least 2 characters"),
   limit: z.number().int().min(1).max(100).default(10),
-  countryCodes: z.array(z.string()).optional(),
-  includeNonPlannableStations: z.boolean().default(false)
+  includeNonPlannableStations: z.boolean().default(false),
+  countryCodes: z.array(z.string().length(2)).optional() // ISO country codes
 });
+
+const NearestStationsSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  limit: z.number().int().min(1).max(20).default(5),
+  radiusKm: z.number().int().min(1).max(50).default(10)
+});
+
+
 ```
 
 ### List of Tasks (Complete in order)
 
 ```yaml
-Task 1 - Enhanced Project Setup:
+Task 1 - Travel-Focused Project Setup:
   UPDATE existing configuration:
     - MODIFY wrangler.jsonc to add new environment variables
-    - UPDATE .dev.vars.example with VALID_API_KEYS, NS_API_KEY
-    - INSTALL additional dependencies: axios for HTTP requests
+    - UPDATE .dev.vars.example with VALID_API_KEYS, NS_API_KEY, CACHE_ENABLED
+    - INSTALL additional dependencies: axios for HTTP requests, date-fns for time handling
 
   CREATE new environment variables:
     - ADD VALID_API_KEYS for API key authentication
     - ADD NS_API_KEY for NS API authentication
+    - ADD CACHE_ENABLED for optional response caching
 
-Task 2 - Database Schema Enhancement:
-  CREATE enhanced database schema:
-    - RUN the provided schema.sql to create projects, tasks, tags, and related tables
-    - ADD api_key_permissions table for API key management
-    - ADD indexes for performance on frequently queried columns
-    - CREATE database migration script if needed
-
-  UPDATE database operations:
-    - EXTEND existing database utilities for new table operations
-    - CREATE project-operations.ts for project-specific database functions
-    - CREATE task-operations.ts for task management functions
-    - IMPLEMENT transaction support for multi-table operations
-
-Task 3 - External API Integration:
-  CREATE NS API client modules:
+Task 2 - NS API Client Development:
+  CREATE comprehensive NS API client modules:
     - CREATE src/api/ns-stations.ts for Stations API integration
-    - CREATE src/api/spoorkaart.ts for route and disruption data
-    - CREATE src/api/reisinformatie.ts for travel information (handle large responses)
+    - CREATE src/api/spoorkaart.ts for route geometry and disruption data
+    - CREATE src/api/reisinformatie.ts for journey planning and travel information
     - IMPLEMENT proper error handling and rate limiting for each API
-    - ADD data caching strategies for frequently requested information
+    - ADD intelligent caching strategies for different data types
 
-Task 4 - Enhanced MCP Tool Registration:
-  CREATE modular tool files:
-    - CREATE src/tools/ns-tools.ts for NS API tools
-    - CREATE src/tools/project-tools.ts for project management
-    - CREATE src/tools/task-tools.ts for task CRUD operations
-    - CREATE src/tools/tag-tools.ts for tag management
+Task 3 - Travel-Focused MCP Tool Registration:
+  CREATE travel tool modules:
+    - CREATE src/tools/station-tools.ts for station search and information
+    - CREATE src/tools/journey-tools.ts for journey planning and route information
+    - CREATE src/tools/service-tools.ts for service status and disruptions
+    - CREATE src/tools/travel-tools.ts for comprehensive travel advice
 
   UPDATE central tool registry:
-    - MODIFY src/tools/register-tools.ts to import and register all new tools
-    - IMPLEMENT permission-based tool registration using API key authentication
+    - MODIFY src/tools/register-tools.ts to import and register all travel tools
+    - IMPLEMENT access-level-based tool registration using API key authentication
     - ADD proper error handling and logging for each tool
 
-Task 5 - Core Business Logic Implementation:
-  CREATE project management logic:
-    - CREATE src/lib/data-export.ts for data export/import functionality
-    - IMPLEMENT project timeline and milestone tracking
-    - ADD project status workflow management
-    - CREATE project analytics and reporting features
+Task 4 - Travel Data Processing Logic:
+  CREATE travel utility functions:
+    - CREATE src/lib/travel-utils.ts for travel calculations and conversions
+    - IMPLEMENT coordinate conversion and distance calculations
+    - ADD travel time estimation and route optimization functions
+    - CREATE data formatting utilities for AI agent consumption
 
-  CREATE task management logic:
-    - IMPLEMENT full CRUD operations for tasks
-    - ADD tag assignment and filtering capabilities
-    - CREATE documentation attachment system
-    - ADD task status workflow management
+  CREATE caching and performance logic:
+    - CREATE src/lib/data-cache.ts for intelligent response caching
+    - IMPLEMENT TTL-based cache expiration for different data types
+    - ADD cache warming strategies for frequently requested data
+    - CREATE cache invalidation logic for real-time data
 
-Task 6 - Enhanced Validation and Error Handling:
+Task 5 - Enhanced Validation and Error Handling:
   CREATE comprehensive validation:
-    - CREATE src/lib/validation.ts with all Zod schemas
-    - IMPLEMENT input validation for all new tools
+    - CREATE src/lib/validation.ts with all travel-focused Zod schemas
+    - IMPLEMENT input validation for all travel tools
     - ADD response formatting utilities in src/lib/response-helpers.ts
-    - CREATE standardized error responses
+    - CREATE standardized error responses for travel data
 
   UPDATE security measures:
-    - EXTEND permission checking for new operations using API key system
-    - ADD API key validation for NS API calls
-    - IMPLEMENT rate limiting for expensive database operations
-    - ADD audit logging for sensitive operations
+    - EXTEND access level checking for travel operations using API key system
+    - ADD API key validation for all NS API calls
+    - IMPLEMENT rate limiting for expensive NS API operations
+    - ADD request logging for monitoring travel data usage
 
-Task 7 - Testing Infrastructure:
+Task 6 - Testing Infrastructure:
   CREATE comprehensive tests:
-    - ADD unit tests for all new API integrations
-    - CREATE integration tests for project management workflow
-    - ADD database operation tests with transaction support
-    - IMPLEMENT mock services for external APIs
+    - ADD unit tests for all NS API integrations
+    - CREATE integration tests for travel information workflow
+    - ADD mock services for NS APIs (stations, routes, disruptions)
+    - IMPLEMENT caching system tests
 
   UPDATE existing tests:
-    - EXTEND existing test fixtures for new data models
-    - ADD permission-based access tests using API keys
-    - CREATE end-to-end workflow tests
+    - EXTEND existing test fixtures for travel data models
+    - ADD access-level-based tests using API keys
+    - CREATE end-to-end travel query tests
 
-Task 8 - Enhanced MCP Server Configuration:
+Task 7 - Enhanced MCP Server Configuration:
   UPDATE main server files:
-    - MODIFY src/index.ts to integrate all new functionality with API key authentication
-    - UPDATE src/index_sentry.ts with enhanced monitoring
-    - ADD new environment variable handling
-    - IMPLEMENT enhanced user permission system based on API keys
+    - MODIFY src/index.ts to integrate all travel functionality with API key authentication
+    - UPDATE src/index_sentry.ts with enhanced travel monitoring
+    - ADD new environment variable handling for travel configuration
+    - IMPLEMENT access level system based on API keys
 
   CREATE additional utilities:
     - ADD configuration validation on startup
-    - IMPLEMENT health check endpoints
-    - CREATE usage analytics and monitoring
+    - IMPLEMENT health check endpoints for NS API connections
+    - CREATE usage analytics for travel queries
 
-Task 9 - Local Development Testing:
+Task 8 - Local Development Testing:
   TEST complete functionality:
     - VERIFY all NS API integrations work correctly
-    - TEST project management functionality with sample data
-    - VALIDATE all CRUD operations for tasks and projects
-    - VERIFY permission systems work as expected with API keys
-    - TEST error handling and recovery scenarios
+    - TEST station search and information retrieval with sample queries
+    - VALIDATE journey planning and route information functions
+    - VERIFY access level systems work as expected with API keys
+    - TEST error handling and recovery scenarios for travel data
 
-Task 10 - Production Deployment:
+Task 9 - Production Deployment:
   PREPARE for production:
-    - SET all required Cloudflare Workers secrets
-    - CONFIGURE database connection pooling settings
-    - SET up monitoring and alerting
-    - DEPLOY with comprehensive smoke tests
-    - VALIDATE all functionality in production environment
+    - SET all required Cloudflare Workers secrets (API keys)
+    - CONFIGURE caching settings for optimal performance
+    - SET up monitoring and alerting for travel services
+    - DEPLOY with comprehensive smoke tests for travel functionality
+    - VALIDATE all travel information endpoints in production environment
 ```
 
 ### Per Task Implementation Details
 
 ```typescript
-// Task 4 - Example Tool Implementation Pattern
-// src/tools/project-tools.ts
+// Task 3 - Example Tool Implementation Pattern
+// src/tools/station-tools.ts
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Props } from "../types";
 import { z } from "zod";
-import { createProject, updateProject, getProjectById } from "../database/project-operations";
+import { callNSAPI } from "../api/ns-stations";
+import { getCachedOrFetch, formatStationForAgent } from "../lib/travel-utils";
 import { validateApiKey } from "../server/auth";
 
-const PRIVILEGED_PERMISSIONS = new Set(['admin', 'privileged']);
+const FULL_ACCESS_LEVELS = new Set(['full', 'premium']);
 
-export function registerProjectTools(server: McpServer, env: Env, props: Props) {
+export function registerStationTools(server: McpServer, env: Env, props: Props) {
   // Available to all authenticated users
   server.tool(
-    "listProjects",
-    "Get all projects with optional filtering",
-    {
-      status: z.enum(['active', 'completed', 'archived', 'on-hold']).optional(),
-      createdBy: z.string().optional(),
-      limit: z.number().int().min(1).max(100).default(20),
-      offset: z.number().int().min(0).default(0)
-    },
-    async ({ status, createdBy, limit, offset }) => {
+    "searchStations",
+    "Search for Dutch railway stations by name or code",
+    StationSearchSchema,
+    async ({ query, limit, includeNonPlannableStations, countryCodes }) => {
       try {
         validateApiKey(props.apiKey);
         
-        return await withDatabase(env.DATABASE_URL, async (db) => {
-          let query = db`SELECT * FROM projects WHERE 1=1`;
-          
-          if (status) query = db`${query} AND status = ${status}`;
-          if (createdBy) query = db`${query} AND created_by = ${createdBy}`;
-          
-          const projects = await db`${query} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
-          
-          return {
-            content: [{
-              type: "text",
-              text: `**Projects Found:** ${projects.length}\n\n${formatProjectList(projects)}`
-            }]
-          };
-        });
+        const cacheKey = `stations:search:${query}:${limit}:${includeNonPlannableStations}`;
+        
+        const stations = await getCachedOrFetch(
+          cacheKey,
+          () => callNSAPI(
+            'https://gateway.apiportal.ns.nl/nsapp-stations/v3',
+            { q: query, limit, countryCodes, includeNonPlannableStations },
+            env.NS_API_KEY
+          ),
+          1800 // Cache for 30 minutes
+        );
+        
+        const formattedStations = stations.payload.map(formatStationForAgent);
+        
+        return {
+          content: [{
+            type: "text",
+            text: `**Stations Found:** ${formattedStations.length}\n\n${formatStationList(formattedStations)}`
+          }]
+        };
       } catch (error) {
-        return createErrorResponse(`Failed to list projects: ${error.message}`);
+        return createErrorResponse(`Station search failed: ${error.message}`);
       }
     }
   );
 
-  // Only for privileged users
-  if (PRIVILEGED_PERMISSIONS.has(props.permissions)) {
+  // Enhanced features for full access users
+  if (FULL_ACCESS_LEVELS.has(props.accessLevel)) {
     server.tool(
-      "createProject",
-      "Create a new project with goals and descriptions",
-      ProjectCreationSchema,
-      async ({ title, description, goals, targetUsers, status }) => {
+      "getStationDetails",
+      "Get detailed information about a specific station including facilities",
+      {
+        stationCode: z.string().min(2, "Station code must be provided"),
+        includeFacilities: z.boolean().default(true)
+      },
+      async ({ stationCode, includeFacilities }) => {
         try {
           validateApiKey(props.apiKey);
 
-          return await withDatabase(env.DATABASE_URL, async (db) => {
-            const [project] = await db`
-              INSERT INTO projects (title, description, goals, target_users, status, created_by)
-              VALUES (${title}, ${description}, ${goals}, ${targetUsers}, ${status}, ${props.userIdentifier})
-              RETURNING *
-            `;
-            
-            return {
-              content: [{
-                type: "text",
-                text: `**Project Created Successfully**\n\n**Title:** ${project.title}\n**Description:** ${project.description}\n**Status:** ${project.status}`
-              }]
-            };
-          });
+          const cacheKey = `station:details:${stationCode}:${includeFacilities}`;
+          
+          const stationDetails = await getCachedOrFetch(
+            cacheKey,
+            () => callNSAPI(
+              `https://gateway.apiportal.ns.nl/nsapp-stations/v3/${stationCode}`,
+              { includeFacilities },
+              env.NS_API_KEY
+            ),
+            1800 // Cache for 30 minutes
+          );
+          
+          const formatted = formatStationForAgent(stationDetails);
+          
+          return {
+            content: [{
+              type: "text", 
+              text: `**Station Details**\n\n**Name:** ${formatted.name}\n**Code:** ${formatted.code}\n**Coordinates:** ${formatted.coordinates?.join(', ') || 'N/A'}\n**Type:** ${formatted.stationType}\n**Facilities:** ${formatted.facilities?.length || 0} available`
+            }]
+          };
         } catch (error) {
-          return createErrorResponse(`Project creation failed: ${error.message}`);
+          return createErrorResponse(`Station details retrieval failed: ${error.message}`);
         }
       }
     );
@@ -753,36 +655,36 @@ export function registerNSTools(server: McpServer, env: Env, props: Props) {
 
 ```yaml
 CLOUDFLARE_WORKERS:
-  - wrangler.jsonc: Add VALID_API_KEYS, NS_API_KEY to environment
-  - Durable Objects: Enhanced MCP agent binding for complex state management
+  - wrangler.jsonc: Add VALID_API_KEYS, NS_API_KEY, CACHE_ENABLED to environment
+  - Edge caching: Global distribution of travel data responses
   - Secrets: All API keys stored as Cloudflare Workers secrets
 
 API_KEY_AUTHENTICATION:
-  - Enhanced permission system: admin, privileged, read-only access levels
-  - User context: API key mapped to permission levels and user identifiers
-  - Request validation: API key validation on every request
+  - Simple access levels: full, standard, basic for travel data access
+  - User context: API key mapped to access levels for travel features
+  - Request validation: API key validation on every travel request
 
-DATABASE:
-  - Enhanced PostgreSQL schema: projects, tasks, tags, documentation, API key permissions
-  - Connection pooling: Optimized for increased concurrent operations
-  - Transactions: Multi-table operations for complex workflows
-  - Indexing: Performance optimization for frequent queries
+CACHING_STRATEGY:
+  - In-memory cache: Fast access to frequently requested travel data
+  - TTL-based expiration: Different cache times for different data types
+  - Cache warming: Proactive loading of popular station and route data
+  - Cache invalidation: Real-time updates for disruptions and delays
 
 EXTERNAL_APIS:
-  - NS Stations API: Station search and location services
-  - SpoorKaart API: Route geometry and disruption information  
-  - ReisinformatieAPI: Comprehensive travel information (handle large responses)
+  - NS Stations API: Station search, details, and location services
+  - SpoorKaart API: Route geometry and service disruption information  
+  - ReisinformatieAPI: Journey planning and comprehensive travel information
 
 ENVIRONMENT_VARIABLES:
   - Development: .dev.vars with all API keys and configuration
   - Production: Cloudflare Workers secrets
-  - Required: DATABASE_URL, VALID_API_KEYS, NS_API_KEY
-  - Optional: SENTRY_DSN for monitoring
+  - Required: VALID_API_KEYS, NS_API_KEY
+  - Optional: SENTRY_DSN for monitoring, CACHE_ENABLED for performance
 
 RATE_LIMITING:
-  - NS API: Respect rate limits and implement backoff strategies
-  - Database Operations: Connection pooling and query optimization
-  - MCP Tools: Per-API-key rate limiting for expensive operations
+  - NS API: Respect rate limits and implement intelligent backoff strategies
+  - Cache Usage: Minimize API calls through intelligent caching
+  - MCP Tools: Per-API-key rate limiting for travel query operations
 ```
 
 ## Validation Gate
@@ -799,28 +701,33 @@ npm run lint                       # ESLint validation
 # If errors: Fix type issues, missing interfaces, import problems, add type definitions
 ```
 
-### Level 2: Database Setup & Validation
+### Level 2: NS API Connection & Validation
 
 ```bash
-# Create and validate database schema
-psql $DATABASE_URL -f src/database/schema.sql
-
-# Test database connections and operations
-npm run test:database             # Database integration tests
-
-# Expected: Schema created successfully, all tables accessible
-# If errors: Check DATABASE_URL, fix schema issues, validate permissions
-```
-
-### Level 3: External API Integration Testing
-
-```bash
-# Test NS API integration
+# Test NS API connectivity and authentication
 curl -H "Ocp-Apim-Subscription-Key: $NS_API_KEY" \
   "https://gateway.apiportal.ns.nl/nsapp-stations/v3?q=amsterdam&limit=5"
 
-# Expected: Valid response from NS API
-# If errors: Check API keys, rate limits, network connectivity
+# Test SpoorKaart API for route data
+curl -H "Ocp-Apim-Subscription-Key: $NS_API_KEY" \
+  "https://gateway.apiportal.ns.nl/spoorkaart-api/api/v1/disruptions"
+
+# Expected: Valid JSON responses with travel data
+# If errors: Check NS_API_KEY, API subscription status, network connectivity
+```
+
+### Level 3: Travel Data Processing & Caching
+
+```bash
+# Test travel data formatting and caching
+npm run test:travel-utils         # Travel utility function tests
+npm run test:caching             # Cache implementation tests
+
+# Test coordinate conversion and distance calculations
+npm run test:coordinates         # Geographic calculation tests
+
+# Expected: All travel processing functions work correctly
+# If errors: Fix formatting functions, cache logic, coordinate calculations
 ```
 
 ### Level 4: Local Development Testing
@@ -856,51 +763,38 @@ npm run test:e2e                 # End-to-end workflow tests
 ### Core Functionality
 
 - [ ] TypeScript compilation: `npm run type-check` passes
-- [ ] Database schema: All tables created and accessible
-- [ ] External APIs: NS APIs respond correctly
+- [ ] NS API connections: All NS APIs respond correctly with valid data
 - [ ] Local server starts: `wrangler dev` runs without errors
 - [ ] MCP endpoint responds: `curl -H "x-api-key: validkey" http://localhost:8787/mcp` returns server info
-- [ ] API key authentication: Valid keys accepted, invalid keys rejected
+- [ ] API key authentication: Valid keys accepted, invalid keys rejected for travel requests
 
-### NS API Integration
+### Station Information System
 
-- [ ] Station search tools return correct data from NS API
-- [ ] Nearest station lookup works with coordinates
-- [ ] Route geometry retrieval from SpoorKaart API
-- [ ] Disruption information accessible
-- [ ] Proper error handling for API failures and rate limits
+- [ ] Station search by name and code returns accurate results
+- [ ] Station details include facilities, coordinates, and accessibility info
+- [ ] Nearest station lookup works correctly with geographic coordinates
+- [ ] Station information formatted properly for AI agent consumption
+- [ ] Multi-language station names handled correctly
 
-### Project Management System
 
-- [ ] Project creation and management works correctly
-- [ ] Project metadata (goals, target users) handled properly
-- [ ] Project status workflows function as expected
-- [ ] Data export and import functionality operational
-- [ ] Project analytics and reporting features work
 
-### Task Management System
 
-- [ ] Full CRUD operations work for tasks, projects, and tags
-- [ ] Task assignment and status updates function correctly
-- [ ] Documentation attachment system operational
-- [ ] Tag-based filtering and organization works
-- [ ] Permission-based access control enforced
 
 ### Security & Performance
 
-- [ ] User permissions prevent unauthorized access to sensitive operations
-- [ ] SQL injection protection active for all database operations
-- [ ] API key validation working for external service calls
-- [ ] Rate limiting prevents abuse of database operations
-- [ ] Error messages don't leak sensitive system information
+- [ ] Access levels prevent unauthorized access to premium travel features
+- [ ] API key validation working for all NS API service calls
+- [ ] Rate limiting prevents abuse of travel information requests
+- [ ] Caching system reduces API calls and improves response times
+- [ ] Error messages don't leak sensitive NS API credentials or internal details
 
 ### Production Readiness
 
-- [ ] All required secrets configured in Cloudflare Workers
-- [ ] Monitoring and logging active (Sentry integration if used)
-- [ ] Database connection pooling optimized for production load
-- [ ] Health checks and status endpoints functional
-- [ ] Comprehensive test coverage achieved
+- [ ] All required secrets configured in Cloudflare Workers (API keys)
+- [ ] Monitoring and logging active for travel service health (Sentry integration if used)
+- [ ] Caching strategy optimized for production travel data loads
+- [ ] Health checks for NS API connections functional
+- [ ] Comprehensive test coverage for travel information workflows achieved
 
 ---
 
@@ -934,4 +828,4 @@ npm run test:e2e                 # End-to-end workflow tests
 - ❌ Don't ignore TypeScript errors - fix all type issues before deployment
 - ❌ Don't skip permission testing - validate access control scenarios
 
-This comprehensive PRP provides all the context, patterns, and implementation details needed to build a production-ready MCP server that combines NS Railways API access with intelligent PRP management and task extraction capabilities using API key authentication instead of GitHub OAuth.
+This comprehensive PRP provides all the context, patterns, and implementation details needed to build a production-ready MCP server that provides AI agents with seamless access to Dutch Railways (NS) API data for travel planning and station information, using API key authentication for secure and scalable access.
