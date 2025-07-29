@@ -1,14 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { Props } from "../types";
-import { registerDatabaseTools } from "../../examples/database-tools";
+import { registerGetStationsV3 } from "./getStationsV3";
+import { registerGetNearestStationsV3 } from "./getNearestStationsV3";
+import { registerGetStationsV2 } from "./getStationsV2";
+import { registerGetNearestStationsV2 } from "./getNearestStationsV2";
 
-/**
- * Register all MCP tools based on user permissions
- */
-export function registerAllTools(server: McpServer, env: Env, props: Props) {
-	// Register database tools
-	registerDatabaseTools(server, env, props);
-	
-	// Future tools can be registered here
-	// registerOtherTools(server, env, props);
+export function registerTools(server: McpServer) {
+  registerGetStationsV3(server);
+  registerGetNearestStationsV3(server);
+  registerGetStationsV2(server);
+  registerGetNearestStationsV2(server);
 }
