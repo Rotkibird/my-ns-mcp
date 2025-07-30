@@ -1,0 +1,25 @@
+datasource db {
+  provider = "postgresql" // of mysql/sqlite afhankelijk van je keuze
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Station {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique           // station code van NS
+  uicCode      String?                     // UIC code
+  nameLong     String                      // volledige naam
+  nameShort    String?                     // korte naam
+  stationType  String                      // bv LOCAL_TRAIN_STATION
+  country      String                      // landcode
+  latitude     Float?                       // voor nearest stations
+  longitude    Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([latitude, longitude])
+  @@index([country])
+}
